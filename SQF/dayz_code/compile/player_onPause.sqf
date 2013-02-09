@@ -23,8 +23,6 @@ private["_display","_btnRespawn","_btnAbort","_timeOut","_timeMax","_isDead"];
 				case (_timeOut < _timeMax && count (player nearEntities ["zZombie_Base", 25]) > 0) : {
 					_btnAbort ctrlEnable false;
 					cutText [format ["Can Abort in %1", (_timeMax - _timeOut)], "PLAIN DOWN"];
-					_timeOut = _timeOut + 1;
-
 				};
 				case (player getVariable["combattimeout", 0] >= time) : {
 					_btnAbort ctrlEnable false;
@@ -36,5 +34,6 @@ private["_display","_btnRespawn","_btnAbort","_timeOut","_timeMax","_isDead"];
 				};
 			};
 			sleep 1;
+			_timeOut = _timeOut + 1;
 		};
 		cutText ["", "PLAIN DOWN"];
