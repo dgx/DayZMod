@@ -533,51 +533,44 @@ DELIMITER //
 CREATE DEFINER=`dayz`@`localhost` PROCEDURE `pCleanupOOB`()
 BEGIN
 
-	DECLARE intLineCount	INT DEFAULT 0;
-	DECLARE intDummyCount	INT DEFAULT 0;
-	DECLARE intDoLine			INT DEFAULT 0;
-	DECLARE intWest				INT DEFAULT 0;
-	DECLARE intNorth			INT DEFAULT 0;
+	DECLARE intDone		INT DEFAULT FALSE;
+	DECLARE intWest		INT DEFAULT 0;
+	DECLARE intNorth	INT DEFAULT 0;
+	DECLARE objUID		VARCHAR(100) DEFAULT '';
+	DECLARE objWS		VARCHAR(100) DEFAULT '';
+	DECLARE objWest		INT DEFAULT 0;
+	DECLARE objNorth	INT DEFAULT 0;
+	DECLARE curObjects 	CURSOR FOR SELECT ObjectUID, Worldspace FROM object_data;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET intDone = TRUE;
 
-	SELECT COUNT(*)
-		INTO intLineCount
-		FROM object_data;
+	OPEN curObjects;
 
-	SELECT COUNT(*)
-		INTO intDummyCount
-		FROM object_data
-		WHERE Classname = 'dummy';
+	cleanup_loop: LOOP
+		FETCH curObjects INTO objUID, objWS;
+		IF intDone = TRUE THEN
+			LEAVE cleanup_loop;
+		END IF;
 
-	WHILE (intLineCount > intDummyCount) DO
-	
-		SET intDoLine = intLineCount - 1;
+		SELECT REPLACE(objWS, '[', '') INTO objWS;
+		SELECT REPLACE(objWS, ']', '') INTO objWS;
+		SELECT REPLACE(SUBSTRING(SUBSTRING_INDEX(objWS, ',', 2), LENGTH(SUBSTRING_INDEX(objWS, ',', 2 -1)) + 1), ',', '') INTO objWest;
+		SELECT REPLACE(SUBSTRING(SUBSTRING_INDEX(objWS, ',', 3), LENGTH(SUBSTRING_INDEX(objWS, ',', 3 -1)) + 1), ',', '') INTO objNorth;
 
-		SELECT ObjectUID, Worldspace
-			INTO @rsObjectUID, @rsWorldspace
-			FROM object_data
-			LIMIT intDoLine, 1;
-
-		SELECT REPLACE(@rsWorldspace, '[', '') INTO @rsWorldspace;
-		SELECT REPLACE(@rsWorldspace, ']', '') INTO @rsWorldspace;
-		SELECT REPLACE(SUBSTRING(SUBSTRING_INDEX(@rsWorldspace, ',', 2), LENGTH(SUBSTRING_INDEX(@rsWorldspace, ',', 2 -1)) + 1), ',', '') INTO @West;
-		SELECT REPLACE(SUBSTRING(SUBSTRING_INDEX(@rsWorldspace, ',', 3), LENGTH(SUBSTRING_INDEX(@rsWorldspace, ',', 3 -1)) + 1), ',', '') INTO @North;
-
-		SELECT INSTR(@West, '-') INTO intWest;
-		SELECT INSTR(@North, '-') INTO intNorth;
+		SELECT INSTR(objWest, '-') INTO intWest;
+		SELECT INSTR(objNorth, '-') INTO intNorth;
 
 		IF (intNorth = 0) THEN
-			SELECT CONVERT(@North, DECIMAL(16,8)) INTO intNorth;
+			SELECT CONVERT(COALESCE(objNorth,''), DECIMAL(16,8)) INTO intNorth;
 		END IF;
 
 		IF (intWest > 0 OR intNorth > 15360) THEN
 			DELETE FROM object_data
-				WHERE ObjectUID = @rsObjectUID;
+				WHERE ObjectUID = objUID;
 		END IF;
-			
-		SET intLineCount = intLineCount - 1;
 
-	END WHILE;
+	END LOOP;
 
+	CLOSE curObjects;
 END//
 DELIMITER ;
 
