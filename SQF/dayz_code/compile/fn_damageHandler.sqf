@@ -104,6 +104,11 @@ if (_hit in USEC_MinorWounds) then {
 	};
 };
 
+//Handle damage for combat roll
+if (_hit in ["", "?"] && _ammo == "") then {
+	[_unit,_hit,_damage] call object_processHit;
+};
+
 
 if (_unitIsPlayer) then {
 //incombat
