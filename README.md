@@ -33,4 +33,9 @@ Directories
 Bugs/Issues
 -----------
 
-- Please report any bugs/issues by submitting a Issue [here] (https://github.com/R4Z0R49/DayZMod/issues).
+- Please report any bugs/issues by submitting a Issue [here] (https://dev-heaven.net/projects/dayz).
+
+Join the project
+----------------
+
+- Your free to message R4Z0R49 on the dayz forums anytime.
