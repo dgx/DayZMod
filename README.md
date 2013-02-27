@@ -5,7 +5,7 @@ Official DayZMod Community Project
 
 Current Version
 ==================================
- - 1.7.6
+ - 1.7.6.1
  
 Requirements
 ------------
